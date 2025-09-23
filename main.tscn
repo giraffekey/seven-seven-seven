@@ -1,0 +1,35 @@
+[gd_scene load_steps=6 format=3 uid="uid://fv4xmds6dq5a"]
+
+[ext_resource type="Script" uid="uid://calnsf1j3loqh" path="res://script.gd" id="1_ig7tw"]
+[ext_resource type="Texture2D" uid="uid://fgp5s7sqwo57" path="res://blocks.png" id="2_0xm2m"]
+[ext_resource type="Texture2D" uid="uid://drf7211st8ep6" path="res://background.png" id="2_h2yge"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_h2yge"]
+texture = ExtResource("2_0xm2m")
+0:0/0 = 0
+1:0/0 = 0
+2:0/0 = 0
+3:0/0 = 0
+4:0/0 = 0
+5:0/0 = 0
+6:0/0 = 0
+7:0/0 = 0
+
+[sub_resource type="TileSet" id="TileSet_1bvp3"]
+sources/0 = SubResource("TileSetAtlasSource_h2yge")
+
+[node name="Main" type="Node2D"]
+script = ExtResource("1_ig7tw")
+
+[node name="Background" type="TextureRect" parent="."]
+offset_right = 40.0
+offset_bottom = 40.0
+texture = ExtResource("2_h2yge")
+
+[node name="BlockLayer" type="TileMapLayer" parent="."]
+position = Vector2(240, 80)
+tile_set = SubResource("TileSet_1bvp3")
+
+[node name="FallTimer" type="Timer" parent="."]
+
+[connection signal="timeout" from="FallTimer" to="." method="_on_fall_timer_timeout"]
