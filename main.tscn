@@ -57,7 +57,9 @@ wait_time = 0.25
 [node name="FastDropTimer" type="Timer" parent="."]
 wait_time = 0.25
 
-[node name="Score" type="Label" parent="."]
+[node name="Text" type="Node2D" parent="."]
+
+[node name="Score" type="Label" parent="Text"]
 offset_left = 456.0
 offset_top = 80.0
 offset_right = 584.0
@@ -66,7 +68,7 @@ text = "SCORE
 0"
 label_settings = SubResource("LabelSettings_lquwl")
 
-[node name="Next" type="Label" parent="."]
+[node name="Next" type="Label" parent="Text"]
 offset_left = 456.0
 offset_top = 128.0
 offset_right = 584.0
@@ -75,13 +77,77 @@ text = "NEXT
 500"
 label_settings = SubResource("LabelSettings_7mycd")
 
-[node name="Level" type="Label" parent="."]
+[node name="Level" type="Label" parent="Text"]
 offset_left = 456.0
-offset_top = 224.0
+offset_top = 240.0
 offset_right = 584.0
-offset_bottom = 272.0
+offset_bottom = 288.0
 text = "LEVEL
       1"
+label_settings = SubResource("LabelSettings_272bh")
+
+[node name="Blocks0" type="Label" parent="Text"]
+offset_left = 88.0
+offset_top = 84.0
+offset_right = 120.0
+offset_bottom = 116.0
+text = "0"
+label_settings = SubResource("LabelSettings_272bh")
+
+[node name="Blocks1" type="Label" parent="Text"]
+offset_left = 152.0
+offset_top = 84.0
+offset_right = 184.0
+offset_bottom = 116.0
+text = "0"
+label_settings = SubResource("LabelSettings_272bh")
+
+[node name="Blocks2" type="Label" parent="Text"]
+offset_left = 88.0
+offset_top = 116.0
+offset_right = 120.0
+offset_bottom = 148.0
+text = "0"
+label_settings = SubResource("LabelSettings_272bh")
+
+[node name="Blocks3" type="Label" parent="Text"]
+offset_left = 152.0
+offset_top = 116.0
+offset_right = 184.0
+offset_bottom = 148.0
+text = "0"
+label_settings = SubResource("LabelSettings_272bh")
+
+[node name="Blocks4" type="Label" parent="Text"]
+offset_left = 88.0
+offset_top = 148.0
+offset_right = 120.0
+offset_bottom = 180.0
+text = "0"
+label_settings = SubResource("LabelSettings_272bh")
+
+[node name="Blocks5" type="Label" parent="Text"]
+offset_left = 152.0
+offset_top = 148.0
+offset_right = 184.0
+offset_bottom = 180.0
+text = "0"
+label_settings = SubResource("LabelSettings_272bh")
+
+[node name="Blocks6" type="Label" parent="Text"]
+offset_left = 88.0
+offset_top = 180.0
+offset_right = 120.0
+offset_bottom = 212.0
+text = "0"
+label_settings = SubResource("LabelSettings_272bh")
+
+[node name="Blocks7" type="Label" parent="Text"]
+offset_left = 152.0
+offset_top = 180.0
+offset_right = 184.0
+offset_bottom = 212.0
+text = "0"
 label_settings = SubResource("LabelSettings_272bh")
 
 [connection signal="timeout" from="FallTimer" to="." method="_on_fall_timer_timeout"]

@@ -7,6 +7,7 @@ var orientation = 0
 var score = 0
 var next = 500
 var level = 1
+var counts = [0, 0, 0, 0, 0, 0, 0, 0]
 
 func _ready():
 	randomize()
@@ -229,6 +230,7 @@ func clear_blocks():
 
 				if row_seq_found:
 					for seq_cell in row_seq_found:
+						counts[block_value(seq_cell)] += 1
 						$BlockLayer.erase_cell(seq_cell)
 
 						for i in range(seq_cell.y):
@@ -247,6 +249,7 @@ func clear_blocks():
 							score += 100 * i
 				elif col_seq_found:
 					for seq_cell in col_seq_found:
+						counts[block_value(seq_cell)] += 1
 						$BlockLayer.erase_cell(seq_cell)
 
 					for i in range(cell.y):
@@ -271,6 +274,8 @@ func clear_blocks():
 				update_labels()
 
 func update_labels() -> void:
-	$Score.text = "SCORE\n" + str(score)
-	$Next.text = "NEXT\n" + str(next)
-	$Level.text = "LEVEL\n      " + str(level)
+	$Text/Score.text = "SCORE\n" + str(score)
+	$Text/Next.text = "NEXT\n" + str(next)
+	$Text/Level.text = "LEVEL\n      " + str(level)
+	for i in range(8):
+		get_node("Text/Blocks" + str(i)).text = str(counts[i])
