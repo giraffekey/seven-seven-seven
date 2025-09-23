@@ -1,8 +1,9 @@
-[gd_scene load_steps=6 format=3 uid="uid://fv4xmds6dq5a"]
+[gd_scene load_steps=10 format=3 uid="uid://fv4xmds6dq5a"]
 
 [ext_resource type="Script" uid="uid://calnsf1j3loqh" path="res://script.gd" id="1_ig7tw"]
 [ext_resource type="Texture2D" uid="uid://fgp5s7sqwo57" path="res://blocks.png" id="2_0xm2m"]
 [ext_resource type="Texture2D" uid="uid://drf7211st8ep6" path="res://background.png" id="2_h2yge"]
+[ext_resource type="FontFile" uid="uid://y5ngibex7jpg" path="res://8-bit.ttf" id="4_1bvp3"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_h2yge"]
 texture = ExtResource("2_0xm2m")
@@ -17,6 +18,18 @@ texture = ExtResource("2_0xm2m")
 
 [sub_resource type="TileSet" id="TileSet_1bvp3"]
 sources/0 = SubResource("TileSetAtlasSource_h2yge")
+
+[sub_resource type="LabelSettings" id="LabelSettings_lquwl"]
+line_spacing = 4.0
+font = ExtResource("4_1bvp3")
+
+[sub_resource type="LabelSettings" id="LabelSettings_7mycd"]
+line_spacing = 4.0
+font = ExtResource("4_1bvp3")
+
+[sub_resource type="LabelSettings" id="LabelSettings_272bh"]
+line_spacing = 4.0
+font = ExtResource("4_1bvp3")
 
 [node name="Main" type="Node2D"]
 script = ExtResource("1_ig7tw")
@@ -43,6 +56,33 @@ wait_time = 0.25
 
 [node name="FastDropTimer" type="Timer" parent="."]
 wait_time = 0.25
+
+[node name="Score" type="Label" parent="."]
+offset_left = 456.0
+offset_top = 80.0
+offset_right = 584.0
+offset_bottom = 128.0
+text = "SCORE
+0"
+label_settings = SubResource("LabelSettings_lquwl")
+
+[node name="Next" type="Label" parent="."]
+offset_left = 456.0
+offset_top = 128.0
+offset_right = 584.0
+offset_bottom = 176.0
+text = "NEXT
+500"
+label_settings = SubResource("LabelSettings_7mycd")
+
+[node name="Level" type="Label" parent="."]
+offset_left = 456.0
+offset_top = 224.0
+offset_right = 584.0
+offset_bottom = 272.0
+text = "LEVEL
+      1"
+label_settings = SubResource("LabelSettings_272bh")
 
 [connection signal="timeout" from="FallTimer" to="." method="_on_fall_timer_timeout"]
 [connection signal="timeout" from="MoveLeftTimer" to="." method="_on_move_left_timer_timeout"]

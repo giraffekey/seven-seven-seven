@@ -5,12 +5,13 @@ var col = 0
 var row = 0
 var orientation = 0
 var score = 0
+var next = 500
 var level = 1
-var next_level = 500
 
 func _ready():
 	randomize()
 	spawn_block()
+	update_labels()
 
 func _process(_delta: float):
 	if Input.is_action_just_pressed("left"):
@@ -238,12 +239,12 @@ func clear_blocks():
 								$BlockLayer.erase_cell(above)
 
 					var sevens = row_sum_found / 7
-					var pts = 100 * sevens * sevens
 					if len(row_seq_found) == sevens:
-						pts *= 2
-
-					score += pts
-					print("Score = ", score, " pts")
+						for i in range(1, sevens - 1):
+							score += 1000 * i
+					else:
+						for i in range(1, sevens + 1):
+							score += 100 * i
 				elif col_seq_found:
 					for seq_cell in col_seq_found:
 						$BlockLayer.erase_cell(seq_cell)
@@ -256,14 +257,20 @@ func clear_blocks():
 							$BlockLayer.erase_cell(above)
 
 					var sevens = col_sum_found / 7
-					var pts = 100 * sevens * sevens
 					if len(col_seq_found) == sevens:
-						pts *= 2
+						for i in range(1, sevens - 1):
+							score += 1000 * i
+					else:
+						for i in range(1, sevens + 1):
+							score += 100 * i
 
-					score += pts
-					print("Score = ", score, " pts")
-
-				while score >= next_level:
+				while score >= next:
 					level += 1
-					next_level += level * 500
-					print("Level ", level)
+					next += level * 500
+				
+				update_labels()
+
+func update_labels() -> void:
+	$Score.text = "SCORE\n" + str(score)
+	$Next.text = "NEXT\n" + str(next)
+	$Level.text = "LEVEL\n      " + str(level)
