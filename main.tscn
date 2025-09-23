@@ -32,4 +32,20 @@ tile_set = SubResource("TileSet_1bvp3")
 
 [node name="FallTimer" type="Timer" parent="."]
 
+[node name="MoveLeftTimer" type="Timer" parent="."]
+wait_time = 0.25
+
+[node name="MoveRightTimer" type="Timer" parent="."]
+wait_time = 0.25
+
+[node name="RotateTimer" type="Timer" parent="."]
+wait_time = 0.25
+
+[node name="FastDropTimer" type="Timer" parent="."]
+wait_time = 0.25
+
 [connection signal="timeout" from="FallTimer" to="." method="_on_fall_timer_timeout"]
+[connection signal="timeout" from="MoveLeftTimer" to="." method="_on_move_left_timer_timeout"]
+[connection signal="timeout" from="MoveRightTimer" to="." method="_on_move_right_timer_timeout"]
+[connection signal="timeout" from="RotateTimer" to="." method="_on_rotate_timer_timeout"]
+[connection signal="timeout" from="FastDropTimer" to="." method="_on_fast_drop_timer_timeout"]

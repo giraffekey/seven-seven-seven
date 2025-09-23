@@ -14,48 +14,28 @@ func _ready():
 
 func _process(_delta: float):
 	if Input.is_action_just_pressed("left"):
-		var old_cells = erase_block()
-		col = max(col - 1, 0)
-		var new_cells = block_cells()
+		move_left()
+		$MoveLeftTimer.start()
 
-		var coords1 = $BlockLayer.get_cell_atlas_coords(new_cells[0])
-		var coords2 = $BlockLayer.get_cell_atlas_coords(new_cells[1])
-		if coords1 != Vector2i(-1, -1) or coords2 != Vector2i(-1, -1):
-			new_cells = old_cells
-			col = min(col + 1, 9)
-
-		$BlockLayer.set_cell(new_cells[0], 0, Vector2i(block[0], 0))
-		$BlockLayer.set_cell(new_cells[1], 0, Vector2i(block[1], 0))
+	if Input.is_action_just_released("left"):
+		$MoveLeftTimer.stop()
 
 	if Input.is_action_just_pressed("right"):
-		var old_cells = erase_block()
-		col = min(col + 1, 9)
-		var new_cells = block_cells()
-		
-		var coords1 = $BlockLayer.get_cell_atlas_coords(new_cells[0])
-		var coords2 = $BlockLayer.get_cell_atlas_coords(new_cells[1])
-		if coords1 != Vector2i(-1, -1) or coords2 != Vector2i(-1, -1):
-			new_cells = old_cells
-			col = max(col - 1, 0)
+		move_right()
+		$MoveRightTimer.start()
 
-		$BlockLayer.set_cell(new_cells[0], 0, Vector2i(block[0], 0))
-		$BlockLayer.set_cell(new_cells[1], 0, Vector2i(block[1], 0))
+	if Input.is_action_just_released("right"):
+		$MoveRightTimer.stop()
 
 	if Input.is_action_just_pressed("rotate"):
-		var old_cells = erase_block()
-		orientation += 1
-		if orientation > 3: orientation = 0
-		var new_cells = block_cells()
-		
-		var coords1 = $BlockLayer.get_cell_atlas_coords(new_cells[0])
-		var coords2 = $BlockLayer.get_cell_atlas_coords(new_cells[1])
-		if coords1 != Vector2i(-1, -1) or coords2 != Vector2i(-1, -1):
-			new_cells = old_cells
-			orientation -= 1
-			if orientation < 0: orientation = 3
+		rotate_block()
+		$RotateTimer.start()
 
-		$BlockLayer.set_cell(new_cells[0], 0, Vector2i(block[0], 0))
-		$BlockLayer.set_cell(new_cells[1], 0, Vector2i(block[1], 0))
+	if Input.is_action_just_released("rotate"):
+		$RotateTimer.stop()
+
+	if Input.is_action_just_pressed("accelerate"):
+		$FallTimer.start(min($FallTimer.time_left, 0.25 / ((level + 1) / 2.0)))
 
 	if Input.is_action_pressed("accelerate"):
 		$FallTimer.wait_time = 0.25 / ((level + 1) / 2.0)
@@ -63,12 +43,28 @@ func _process(_delta: float):
 		$FallTimer.wait_time = 1.0 / ((level + 1) / 2.0)
 
 	if Input.is_action_just_pressed("fast_drop"):
-		if row == 0:
-			_on_fall_timer_timeout()
-		while row > 0:
-			_on_fall_timer_timeout()
+		fast_drop()
+		$FastDropTimer.start()
+
+	if Input.is_action_just_released("fast_drop"):
+		$FastDropTimer.stop()
 
 func _on_fall_timer_timeout() -> void:
+	fall()
+
+func _on_move_left_timer_timeout() -> void:
+	move_left()
+
+func _on_move_right_timer_timeout() -> void:
+	move_right()
+
+func _on_rotate_timer_timeout() -> void:
+	rotate_block()
+
+func _on_fast_drop_timer_timeout() -> void:
+	fast_drop()
+
+func fall() -> void:
 	var old_cells = erase_block()
 	row = min(row + 1, 19)
 	var new_cells = block_cells()
@@ -84,6 +80,56 @@ func _on_fall_timer_timeout() -> void:
 	if new_cells == old_cells:
 		clear_blocks()
 		spawn_block()
+
+func move_left() -> void:
+	var old_cells = erase_block()
+	col = max(col - 1, 0)
+	var new_cells = block_cells()
+
+	var coords1 = $BlockLayer.get_cell_atlas_coords(new_cells[0])
+	var coords2 = $BlockLayer.get_cell_atlas_coords(new_cells[1])
+	if coords1 != Vector2i(-1, -1) or coords2 != Vector2i(-1, -1):
+		new_cells = old_cells
+		col = min(col + 1, 9)
+
+	$BlockLayer.set_cell(new_cells[0], 0, Vector2i(block[0], 0))
+	$BlockLayer.set_cell(new_cells[1], 0, Vector2i(block[1], 0))
+
+func move_right() -> void:
+	var old_cells = erase_block()
+	col = min(col + 1, 9)
+	var new_cells = block_cells()
+	
+	var coords1 = $BlockLayer.get_cell_atlas_coords(new_cells[0])
+	var coords2 = $BlockLayer.get_cell_atlas_coords(new_cells[1])
+	if coords1 != Vector2i(-1, -1) or coords2 != Vector2i(-1, -1):
+		new_cells = old_cells
+		col = max(col - 1, 0)
+
+	$BlockLayer.set_cell(new_cells[0], 0, Vector2i(block[0], 0))
+	$BlockLayer.set_cell(new_cells[1], 0, Vector2i(block[1], 0))
+
+func rotate_block() -> void:
+	var old_cells = erase_block()
+	orientation += 1
+	if orientation > 3: orientation = 0
+	var new_cells = block_cells()
+	
+	var coords1 = $BlockLayer.get_cell_atlas_coords(new_cells[0])
+	var coords2 = $BlockLayer.get_cell_atlas_coords(new_cells[1])
+	if coords1 != Vector2i(-1, -1) or coords2 != Vector2i(-1, -1):
+		new_cells = old_cells
+		orientation -= 1
+		if orientation < 0: orientation = 3
+
+	$BlockLayer.set_cell(new_cells[0], 0, Vector2i(block[0], 0))
+	$BlockLayer.set_cell(new_cells[1], 0, Vector2i(block[1], 0))
+
+func fast_drop() -> void:
+	if row == 0:
+		fall()
+	while row > 0:
+		fall()
 
 func block_cells() -> Array:
 	var c = col
