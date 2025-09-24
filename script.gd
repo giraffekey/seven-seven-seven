@@ -8,6 +8,7 @@ var score = 0
 var next = 500
 var level = 1
 var counts = [0, 0, 0, 0, 0, 0, 0, 0]
+var fast_dropping = false
 
 func _ready() -> void:
 	randomize()
@@ -47,9 +48,11 @@ func _process(_delta: float) -> void:
 	if Input.is_action_just_pressed("fast_drop") and not $FallTimer.is_stopped():
 		fast_drop()
 		$FastDropTimer.start()
+		fast_dropping = true
 
 	if Input.is_action_just_released("fast_drop"):
 		$FastDropTimer.stop()
+		fast_dropping = false
 
 func _on_fall_timer_timeout() -> void:
 	fall()
@@ -170,7 +173,8 @@ func spawn_block() -> void:
 	var coords1 = $BlockLayer.get_cell_atlas_coords(cells[0])
 	var coords2 = $BlockLayer.get_cell_atlas_coords(cells[1])
 	if coords1 != Vector2i(-1, -1) or coords2 != Vector2i(-1, -1):
-		get_window().queue_free()
+		get_tree().reload_current_scene()
+		return
 
 	$BlockLayer.set_cell(cells[0], 0, Vector2i(block[0], 0))
 	$BlockLayer.set_cell(cells[1], 0, Vector2i(block[1], 0))
@@ -185,109 +189,124 @@ func erase_block() -> Array:
 
 func clear_blocks():
 	$FallTimer.stop()
-	for c in range(10):
-		for r in range(20):
-			var cell = Vector2i(c, r)
-			if block_value(cell) > -1:
-				var row_seq = []
-				var row_sum = 0
-				var row_seq_found = null
-				var row_sum_found = 0
-				for i in range(10 - c):
-					var next_cell = Vector2i(c + i, r)
-					var value = block_value(next_cell)
-					if value > -1:
-						if len(row_seq) > 0 or value > 0:
-							row_seq.append(next_cell)
-							row_sum += value
-						if row_sum > 0 and value > 0 and row_sum % 7 == 0 and len(row_seq) >= 2:
-							row_seq_found = row_seq.duplicate()
-							row_sum_found = row_sum
-					else:
-						break
 
-				if row_seq_found and len(row_seq_found) == 2 and row_sum_found == 14:
-					row_seq_found = null
+	if fast_dropping:
+		$FastDropTimer.stop()
+	
+	var cleared = true
+	while cleared:
+		cleared = false
+		for c in range(10):
+			for r in range(20):
+				var cell = Vector2i(c, r)
+				if block_value(cell) > -1:
+					var row_seq = []
+					var row_sum = 0
+					var row_seq_found = null
+					var row_sum_found = 0
+					for i in range(10 - c):
+						var next_cell = Vector2i(c + i, r)
+						var value = block_value(next_cell)
+						if value > -1:
+							if len(row_seq) > 0 or value > 0:
+								row_seq.append(next_cell)
+								row_sum += value
+							if row_sum > 0 and value > 0 and row_sum % 7 == 0 and len(row_seq) >= 2:
+								row_seq_found = row_seq.duplicate()
+								row_sum_found = row_sum
+						else:
+							break
 
-				var col_seq = []
-				var col_sum = 0
-				var col_seq_found = null
-				var col_sum_found = 0
-				for i in range(20 - r):
-					var next_cell = Vector2i(c, r + i)
-					var value = block_value(next_cell)
-					if value > -1:
-						if len(col_seq) > 0 or value > 0:
-							col_seq.append(next_cell)
-							col_sum += value
-						if col_sum > 0 and value > 0 and col_sum % 7 == 0 and len(col_seq) >= 2:
-							col_seq_found = col_seq.duplicate()
-							col_sum_found = col_sum
-					else:
-						break
+					if row_seq_found and len(row_seq_found) == 2 and row_sum_found == 14:
+						row_seq_found = null
 
-				if col_seq_found and len(col_seq_found) == 2 and col_sum_found == 14:
-					col_seq_found = null
+					var col_seq = []
+					var col_sum = 0
+					var col_seq_found = null
+					var col_sum_found = 0
+					for i in range(20 - r):
+						var next_cell = Vector2i(c, r + i)
+						var value = block_value(next_cell)
+						if value > -1:
+							if len(col_seq) > 0 or value > 0:
+								col_seq.append(next_cell)
+								col_sum += value
+							if col_sum > 0 and value > 0 and col_sum % 7 == 0 and len(col_seq) >= 2:
+								col_seq_found = col_seq.duplicate()
+								col_sum_found = col_sum
+						else:
+							break
 
-				if row_seq_found:
-					for seq_cell in row_seq_found:
-						var coords = $BlockLayer.get_cell_atlas_coords(seq_cell)
-						coords.y = 1
-						$BlockLayer.set_cell(seq_cell, 0, coords)
+					if col_seq_found and len(col_seq_found) == 2 and col_sum_found == 14:
+						col_seq_found = null
 
-					await get_tree().create_timer(0.25).timeout
+					if row_seq_found:
+						for seq_cell in row_seq_found:
+							var coords = $BlockLayer.get_cell_atlas_coords(seq_cell)
+							coords.y = 1
+							$BlockLayer.set_cell(seq_cell, 0, coords)
 
-					for seq_cell in row_seq_found:
-						counts[block_value(seq_cell)] += 1
-						$BlockLayer.erase_cell(seq_cell)
+						await get_tree().create_timer(0.25).timeout
 
-						for i in range(seq_cell.y):
-							var above = seq_cell - Vector2i(0, i)
+						for seq_cell in row_seq_found:
+							counts[block_value(seq_cell)] += 1
+							$BlockLayer.erase_cell(seq_cell)
+
+							for i in range(seq_cell.y):
+								var above = seq_cell - Vector2i(0, i)
+								var coords = $BlockLayer.get_cell_atlas_coords(above)
+								if coords != Vector2i(-1, -1):
+									$BlockLayer.set_cell(above + Vector2i(0, 1), 0, coords)
+									$BlockLayer.erase_cell(above)
+
+						var sevens = row_sum_found / 7
+						if len(row_seq_found) == sevens:
+							for i in range(1, sevens - 1):
+								score += 1000 * i
+						else:
+							for i in range(1, sevens + 1):
+								score += 100 * i
+
+						cleared = true
+					elif col_seq_found:
+						for seq_cell in col_seq_found:
+							var coords = $BlockLayer.get_cell_atlas_coords(seq_cell)
+							coords.y = 1
+							$BlockLayer.set_cell(seq_cell, 0, coords)
+
+						await get_tree().create_timer(0.25).timeout
+
+						for seq_cell in col_seq_found:
+							counts[block_value(seq_cell)] += 1
+							$BlockLayer.erase_cell(seq_cell)
+
+						for i in range(cell.y):
+							var above = cell - Vector2i(0, i)
 							var coords = $BlockLayer.get_cell_atlas_coords(above)
 							if coords != Vector2i(-1, -1):
-								$BlockLayer.set_cell(above + Vector2i(0, 1), 0, coords)
+								$BlockLayer.set_cell(above + Vector2i(0, len(col_seq_found)), 0, coords)
 								$BlockLayer.erase_cell(above)
 
-					var sevens = row_sum_found / 7
-					if len(row_seq_found) == sevens:
-						for i in range(1, sevens - 1):
-							score += 1000 * i
-					else:
-						for i in range(1, sevens + 1):
-							score += 100 * i
-				elif col_seq_found:
-					for seq_cell in col_seq_found:
-						var coords = $BlockLayer.get_cell_atlas_coords(seq_cell)
-						coords.y = 1
-						$BlockLayer.set_cell(seq_cell, 0, coords)
+						var sevens = col_sum_found / 7
+						if len(col_seq_found) == sevens:
+							for i in range(1, sevens - 1):
+								score += 1000 * i
+						else:
+							for i in range(1, sevens + 1):
+								score += 100 * i
 
-					await get_tree().create_timer(0.25).timeout
+						cleared = true
 
-					for seq_cell in col_seq_found:
-						counts[block_value(seq_cell)] += 1
-						$BlockLayer.erase_cell(seq_cell)
+					while score >= next:
+						level += 1
+						next += level * 500
 
-					for i in range(cell.y):
-						var above = cell - Vector2i(0, i)
-						var coords = $BlockLayer.get_cell_atlas_coords(above)
-						if coords != Vector2i(-1, -1):
-							$BlockLayer.set_cell(above + Vector2i(0, len(col_seq_found)), 0, coords)
-							$BlockLayer.erase_cell(above)
+					update_labels()
 
-					var sevens = col_sum_found / 7
-					if len(col_seq_found) == sevens:
-						for i in range(1, sevens - 1):
-							score += 1000 * i
-					else:
-						for i in range(1, sevens + 1):
-							score += 100 * i
-
-				while score >= next:
-					level += 1
-					next += level * 500
-
-				update_labels()
 	$FallTimer.start()
+	
+	if fast_dropping:
+		$FastDropTimer.start()
 
 func update_labels() -> void:
 	$Text/Score.text = "SCORE\n" + str(score)
