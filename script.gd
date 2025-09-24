@@ -9,34 +9,34 @@ var next = 500
 var level = 1
 var counts = [0, 0, 0, 0, 0, 0, 0, 0]
 
-func _ready():
+func _ready() -> void:
 	randomize()
 	spawn_block()
 	update_labels()
 
-func _process(_delta: float):
-	if Input.is_action_just_pressed("left"):
+func _process(_delta: float) -> void:
+	if Input.is_action_just_pressed("left") and not $FallTimer.is_stopped():
 		move_left()
 		$MoveLeftTimer.start()
 
 	if Input.is_action_just_released("left"):
 		$MoveLeftTimer.stop()
 
-	if Input.is_action_just_pressed("right"):
+	if Input.is_action_just_pressed("right") and not $FallTimer.is_stopped():
 		move_right()
 		$MoveRightTimer.start()
 
 	if Input.is_action_just_released("right"):
 		$MoveRightTimer.stop()
 
-	if Input.is_action_just_pressed("rotate"):
+	if Input.is_action_just_pressed("rotate") and not $FallTimer.is_stopped():
 		rotate_block()
 		$RotateTimer.start()
 
 	if Input.is_action_just_released("rotate"):
 		$RotateTimer.stop()
 
-	if Input.is_action_just_pressed("accelerate"):
+	if Input.is_action_just_pressed("accelerate") and not $FallTimer.is_stopped():
 		$FallTimer.start(min($FallTimer.time_left, 0.25 / ((level + 1) / 2.0)))
 
 	if Input.is_action_pressed("accelerate"):
@@ -44,7 +44,7 @@ func _process(_delta: float):
 	else:
 		$FallTimer.wait_time = 1.0 / ((level + 1) / 2.0)
 
-	if Input.is_action_just_pressed("fast_drop"):
+	if Input.is_action_just_pressed("fast_drop") and not $FallTimer.is_stopped():
 		fast_drop()
 		$FastDropTimer.start()
 
@@ -80,7 +80,7 @@ func fall() -> void:
 	$BlockLayer.set_cell(new_cells[1], 0, Vector2i(block[1], 0))
 
 	if new_cells == old_cells:
-		clear_blocks()
+		await clear_blocks()
 		spawn_block()
 
 func move_left() -> void:
@@ -101,7 +101,7 @@ func move_right() -> void:
 	var old_cells = erase_block()
 	col = min(col + 1, 9)
 	var new_cells = block_cells()
-	
+
 	var coords1 = $BlockLayer.get_cell_atlas_coords(new_cells[0])
 	var coords2 = $BlockLayer.get_cell_atlas_coords(new_cells[1])
 	if coords1 != Vector2i(-1, -1) or coords2 != Vector2i(-1, -1):
@@ -116,7 +116,7 @@ func rotate_block() -> void:
 	orientation += 1
 	if orientation > 3: orientation = 0
 	var new_cells = block_cells()
-	
+
 	var coords1 = $BlockLayer.get_cell_atlas_coords(new_cells[0])
 	var coords2 = $BlockLayer.get_cell_atlas_coords(new_cells[1])
 	if coords1 != Vector2i(-1, -1) or coords2 != Vector2i(-1, -1):
@@ -129,9 +129,9 @@ func rotate_block() -> void:
 
 func fast_drop() -> void:
 	if row == 0:
-		fall()
+		await fall()
 	while row > 0:
-		fall()
+		await fall()
 
 func block_cells() -> Array:
 	var c = col
@@ -184,6 +184,7 @@ func erase_block() -> Array:
 	return cells
 
 func clear_blocks():
+	$FallTimer.stop()
 	for c in range(10):
 		for r in range(20):
 			var cell = Vector2i(c, r)
@@ -230,6 +231,13 @@ func clear_blocks():
 
 				if row_seq_found:
 					for seq_cell in row_seq_found:
+						var coords = $BlockLayer.get_cell_atlas_coords(seq_cell)
+						coords.y = 1
+						$BlockLayer.set_cell(seq_cell, 0, coords)
+
+					await get_tree().create_timer(0.25).timeout
+
+					for seq_cell in row_seq_found:
 						counts[block_value(seq_cell)] += 1
 						$BlockLayer.erase_cell(seq_cell)
 
@@ -248,6 +256,13 @@ func clear_blocks():
 						for i in range(1, sevens + 1):
 							score += 100 * i
 				elif col_seq_found:
+					for seq_cell in col_seq_found:
+						var coords = $BlockLayer.get_cell_atlas_coords(seq_cell)
+						coords.y = 1
+						$BlockLayer.set_cell(seq_cell, 0, coords)
+
+					await get_tree().create_timer(0.25).timeout
+
 					for seq_cell in col_seq_found:
 						counts[block_value(seq_cell)] += 1
 						$BlockLayer.erase_cell(seq_cell)
@@ -270,8 +285,9 @@ func clear_blocks():
 				while score >= next:
 					level += 1
 					next += level * 500
-				
+
 				update_labels()
+	$FallTimer.start()
 
 func update_labels() -> void:
 	$Text/Score.text = "SCORE\n" + str(score)
