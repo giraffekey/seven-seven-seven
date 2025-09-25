@@ -1,17 +1,19 @@
 extends Node2D
 
 var block = [null, null]
+var next = [null, null]
 var col = 0
 var row = 0
 var orientation = 0
 var score = 0
-var next = 500
+var next_level = 500
 var level = 1
 var counts = [0, 0, 0, 0, 0, 0, 0, 0]
 var fast_dropping = false
 
 func _ready() -> void:
 	randomize()
+	gen_next()
 	spawn_block()
 	update_labels()
 
@@ -85,6 +87,7 @@ func fall() -> void:
 	if new_cells == old_cells:
 		await clear_blocks()
 		spawn_block()
+		update_labels()
 
 func move_left() -> void:
 	var old_cells = erase_block()
@@ -157,16 +160,20 @@ func block_cells() -> Array:
 func block_value(cell: Vector2i) -> int:
 	return $BlockLayer.get_cell_atlas_coords(cell).x
 
-func spawn_block() -> void:
+func gen_next() -> void:
 	var first = randi_range(0, 7)
 	var nums = range(8)
 	nums.remove_at(7 - first)
 	var second = nums.pick_random()
-	block = [first, second]
+	next = [first, second]
 
+func spawn_block() -> void:
+	block = next.duplicate()
 	col = randi_range(0, 9)
 	row = 0
 	orientation = randi_range(0, 3)
+
+	gen_next()
 
 	var cells = block_cells()
 
@@ -306,9 +313,9 @@ func clear_blocks():
 						cleared = true
 						lines += 1
 
-					while score >= next:
+					while score >= next_level:
 						level += 1
-						next += level * 500
+						next_level += level * 500
 
 					update_labels()
 
@@ -318,8 +325,10 @@ func clear_blocks():
 		$FastDropTimer.start()
 
 func update_labels() -> void:
-	$Text/Score.text = "SCORE\n" + str(score)
-	$Text/Next.text = "NEXT\n" + str(next)
-	$Text/Level.text = "LEVEL\n      " + str(level)
+	$UI/Score.text = "SCORE\n" + str(score)
+	$UI/NextLevel.text = "NEXT LEVEL\n" + str(next_level)
+	$UI/Level.text = "LEVEL\n      " + str(level)
 	for i in range(8):
-		get_node("Text/Blocks" + str(i)).text = str(counts[i])
+		get_node("UI/Blocks" + str(i)).text = str(counts[i])
+	$UI/NextBlock1.frame = next[0]
+	$UI/NextBlock2.frame = next[1]
