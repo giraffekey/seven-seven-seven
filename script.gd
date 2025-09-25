@@ -194,6 +194,7 @@ func clear_blocks():
 		$FastDropTimer.stop()
 	
 	var cleared = true
+	var lines = 0
 	while cleared:
 		cleared = false
 		for c in range(10):
@@ -267,7 +268,11 @@ func clear_blocks():
 							for i in range(1, sevens + 1):
 								score += 100 * i
 
+						score += 100 * lines
+						score += 100 * max(len(row_seq_found) - 3, 0)
+
 						cleared = true
+						lines += 1
 					elif col_seq_found:
 						for seq_cell in col_seq_found:
 							var coords = $BlockLayer.get_cell_atlas_coords(seq_cell)
@@ -295,7 +300,11 @@ func clear_blocks():
 							for i in range(1, sevens + 1):
 								score += 100 * i
 
+						score += 100 * lines
+						score += 100 * max(len(col_seq_found) - 3, 0)
+
 						cleared = true
+						lines += 1
 
 					while score >= next:
 						level += 1
