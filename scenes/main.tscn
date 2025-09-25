@@ -5,7 +5,7 @@
 [ext_resource type="Texture2D" uid="uid://fgp5s7sqwo57" path="res://assets/sprites/blocks.png" id="3_tefeu"]
 [ext_resource type="FontFile" uid="uid://y5ngibex7jpg" path="res://assets/fonts/8-bit.ttf" id="4_o6xl0"]
 [ext_resource type="Texture2D" uid="uid://qgx7xnvjacvl" path="res://assets/sprites/ui.png" id="5_tbgi4"]
-[ext_resource type="AudioStream" uid="uid://f8x44mrf32ur" path="res://assets/audio/bip-bop.ogg" id="7_o6xl0"]
+[ext_resource type="AudioStream" uid="uid://f8x44mrf32ur" path="res://assets/audio/music.ogg" id="7_o6xl0"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_h2yge"]
 texture = ExtResource("3_tefeu")
@@ -244,8 +244,12 @@ text = "INPUT NAME:
 _"
 label_settings = SubResource("LabelSettings_7mycd")
 
-[node name="Music" type="AudioStreamPlayer2D" parent="."]
+[node name="Music" type="AudioStreamPlayer" parent="."]
 stream = SubResource("AudioStreamPlaylist_tefeu")
+volume_db = -1.0
+
+[node name="SoundEffect" type="AudioStreamPlayer" parent="."]
+volume_db = -5.0
 
 [connection signal="timeout" from="FallTimer" to="." method="_on_fall_timer_timeout"]
 [connection signal="timeout" from="MoveLeftTimer" to="." method="_on_move_left_timer_timeout"]

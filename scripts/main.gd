@@ -1,6 +1,9 @@
 extends Node2D
 
 const SAVE_PATH = "user://777.save"
+const place_sound = preload("res://assets/audio/place.wav")
+const clear_sound = preload("res://assets/audio/clear.wav")
+const lose_sound = preload("res://assets/audio/lose.wav")
 
 var block = [null, null]
 var next = [null, null]
@@ -242,14 +245,7 @@ func spawn_block() -> void:
 	var coords1 = $BlockLayer.get_cell_atlas_coords(cells[0])
 	var coords2 = $BlockLayer.get_cell_atlas_coords(cells[1])
 	if coords1 != Vector2i(-1, -1) or coords2 != Vector2i(-1, -1):
-		player_name = ""
-		paused = true
-		lost = true
-
-		$Lost.visible = true
-		$CursorTimer.start()
-		update_name_text()
-		$Music.stop()
+		lose()
 		return
 
 	$BlockLayer.set_cell(cells[0], 0, Vector2i(block[0], 0))
@@ -352,6 +348,9 @@ func clear_blocks():
 
 						cleared = true
 						lines += 1
+						
+						$SoundEffect.stream = clear_sound
+						$SoundEffect.play()
 					elif col_seq_found:
 						for seq_cell in col_seq_found:
 							var coords = $BlockLayer.get_cell_atlas_coords(seq_cell)
@@ -387,6 +386,9 @@ func clear_blocks():
 						cleared = true
 						lines += 1
 
+						$SoundEffect.stream = clear_sound
+						$SoundEffect.play()
+
 					while score >= next_level:
 						level += 1
 						next_level += level * 500
@@ -398,6 +400,10 @@ func clear_blocks():
 
 	if fast_dropping:
 		$FastDropTimer.start()
+
+	if lines == 0:
+		$SoundEffect.stream = place_sound
+		$SoundEffect.play()
 
 func update_labels() -> void:
 	$UI/Score.text = "SCORE\n" + str(score)
@@ -413,3 +419,17 @@ func update_name_text() -> void:
 		$Lost/Name.text = "INPUT NAME:\n" + player_name + "_"
 	else:
 		$Lost/Name.text = "INPUT NAME:\n" + player_name
+
+func lose() -> void:
+	player_name = ""
+	paused = true
+	lost = true
+
+	$FallTimer.stop()
+	$Lost.visible = true
+	$CursorTimer.start()
+	update_name_text()
+
+	$Music.stop()
+	$SoundEffect.stream = lose_sound
+	$SoundEffect.play()
