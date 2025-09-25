@@ -16,6 +16,7 @@ var paused = false
 var lost = false
 var player_name = ""
 var show_cursor = true
+var scores = []
 
 func _ready() -> void:
 	randomize()
@@ -23,6 +24,17 @@ func _ready() -> void:
 	spawn_block()
 	update_labels()
 	$Music.play()
+	
+	var save_data
+	if FileAccess.file_exists(SAVE_PATH):
+		var json = JSON.new()
+		json.parse(FileAccess.get_file_as_string(SAVE_PATH))
+		save_data = json.data
+	else:
+		save_data = {"scores": []}
+
+	if save_data:
+		scores = save_data.scores
 
 func _process(_delta: float) -> void:
 	if Input.is_action_just_pressed("left") and not $FallTimer.is_stopped():
@@ -74,20 +86,13 @@ func _process(_delta: float) -> void:
 			$Music.play()
 
 	if lost and Input.is_action_just_released("confirm"):
-		var save_data
-		if FileAccess.file_exists(SAVE_PATH):
-			var json = JSON.new()
-			json.parse(FileAccess.get_file_as_string(SAVE_PATH))
-			save_data = json.data
-		else:
-			save_data = {"scores": []}
-
-		save_data.scores.append({"name": player_name, "score": score})
+		scores.append({"name": player_name, "score": score})
 
 		var save_file = FileAccess.open(SAVE_PATH, FileAccess.WRITE)
-		save_file.store_string(JSON.stringify(save_data))
+		save_file.store_string(JSON.stringify({"scores": scores}))
 
 		var scene = load("res://scenes/leaderboard.tscn").instantiate()
+		scene.scores = scores
 		get_tree().root.add_child(scene)
 		get_tree().root.remove_child(self)
 		queue_free()
