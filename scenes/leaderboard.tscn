@@ -1,0 +1,133 @@
+[gd_scene load_steps=5 format=3 uid="uid://nd70tm2cd471"]
+
+[ext_resource type="Script" uid="uid://bya2lyq1ja50m" path="res://scripts/leaderboard.gd" id="1_mrg81"]
+[ext_resource type="Texture2D" uid="uid://cdr6jdr0ma2vh" path="res://assets/sprites/leaderboard.png" id="2_wgq7h"]
+[ext_resource type="FontFile" uid="uid://y5ngibex7jpg" path="res://assets/fonts/8-bit.ttf" id="3_8lgqg"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_e4dr1"]
+line_spacing = 4.0
+font = ExtResource("3_8lgqg")
+
+[node name="Leaderboard" type="Node2D"]
+script = ExtResource("1_mrg81")
+
+[node name="Background" type="TextureRect" parent="."]
+offset_right = 40.0
+offset_bottom = 40.0
+texture = ExtResource("2_wgq7h")
+
+[node name="Scores" type="GridContainer" parent="."]
+offset_left = 157.0
+offset_top = 88.0
+offset_right = 483.0
+offset_bottom = 416.0
+theme_override_constants/h_separation = 64
+theme_override_constants/v_separation = 16
+columns = 2
+
+[node name="Name0" type="Label" parent="Scores"]
+layout_mode = 2
+text = "AAAAAAAAAA"
+label_settings = SubResource("LabelSettings_e4dr1")
+
+[node name="Score0" type="Label" parent="Scores"]
+layout_mode = 2
+text = "0000000000"
+label_settings = SubResource("LabelSettings_e4dr1")
+
+[node name="Name1" type="Label" parent="Scores"]
+layout_mode = 2
+text = "AAAAAAAAAA"
+label_settings = SubResource("LabelSettings_e4dr1")
+
+[node name="Score1" type="Label" parent="Scores"]
+layout_mode = 2
+text = "0000000000"
+label_settings = SubResource("LabelSettings_e4dr1")
+
+[node name="Name2" type="Label" parent="Scores"]
+layout_mode = 2
+text = "AAAAAAAAAA"
+label_settings = SubResource("LabelSettings_e4dr1")
+
+[node name="Score2" type="Label" parent="Scores"]
+layout_mode = 2
+text = "0000000000"
+label_settings = SubResource("LabelSettings_e4dr1")
+
+[node name="Name3" type="Label" parent="Scores"]
+layout_mode = 2
+text = "AAAAAAAAAA"
+label_settings = SubResource("LabelSettings_e4dr1")
+
+[node name="Score3" type="Label" parent="Scores"]
+layout_mode = 2
+text = "0000000000"
+label_settings = SubResource("LabelSettings_e4dr1")
+
+[node name="Name4" type="Label" parent="Scores"]
+layout_mode = 2
+text = "AAAAAAAAAA"
+label_settings = SubResource("LabelSettings_e4dr1")
+
+[node name="Score4" type="Label" parent="Scores"]
+layout_mode = 2
+text = "0000000000"
+label_settings = SubResource("LabelSettings_e4dr1")
+
+[node name="Name5" type="Label" parent="Scores"]
+layout_mode = 2
+text = "AAAAAAAAAA"
+label_settings = SubResource("LabelSettings_e4dr1")
+
+[node name="Score5" type="Label" parent="Scores"]
+layout_mode = 2
+text = "0000000000"
+label_settings = SubResource("LabelSettings_e4dr1")
+
+[node name="Name6" type="Label" parent="Scores"]
+layout_mode = 2
+text = "AAAAAAAAAA"
+label_settings = SubResource("LabelSettings_e4dr1")
+
+[node name="Score6" type="Label" parent="Scores"]
+layout_mode = 2
+text = "0000000000"
+label_settings = SubResource("LabelSettings_e4dr1")
+
+[node name="Name7" type="Label" parent="Scores"]
+layout_mode = 2
+text = "AAAAAAAAAA"
+label_settings = SubResource("LabelSettings_e4dr1")
+
+[node name="Score7" type="Label" parent="Scores"]
+layout_mode = 2
+text = "0000000000"
+label_settings = SubResource("LabelSettings_e4dr1")
+
+[node name="Name8" type="Label" parent="Scores"]
+layout_mode = 2
+text = "AAAAAAAAAA"
+label_settings = SubResource("LabelSettings_e4dr1")
+
+[node name="Score8" type="Label" parent="Scores"]
+layout_mode = 2
+text = "0000000000"
+label_settings = SubResource("LabelSettings_e4dr1")
+
+[node name="Name9" type="Label" parent="Scores"]
+layout_mode = 2
+text = "AAAAAAAAAA"
+label_settings = SubResource("LabelSettings_e4dr1")
+
+[node name="Score9" type="Label" parent="Scores"]
+layout_mode = 2
+text = "0000000000"
+label_settings = SubResource("LabelSettings_e4dr1")
+
+[node name="ConfirmTimer" type="Timer" parent="."]
+wait_time = 3.0
+one_shot = true
+autostart = true
+
+[connection signal="timeout" from="ConfirmTimer" to="." method="_on_confirm_timer_timeout"]

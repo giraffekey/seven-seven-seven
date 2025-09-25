@@ -1,5 +1,8 @@
 extends Node2D
 
+const SAVE_PATH = "res://777-save.tres"
+const Save = preload("res://resources/save.gd")
+
 var block = [null, null]
 var next = [null, null]
 var col = 0
@@ -9,8 +12,11 @@ var score = 0
 var next_level = 500
 var level = 1
 var counts = [0, 0, 0, 0, 0, 0, 0, 0]
-var paused = false
 var fast_dropping = false
+var paused = false
+var lost = false
+var player_name = ""
+var show_cursor = true
 
 func _ready() -> void:
 	randomize()
@@ -57,13 +63,47 @@ func _process(_delta: float) -> void:
 		$FastDropTimer.stop()
 		fast_dropping = false
 
-	if Input.is_action_just_pressed("pause"):
+	if Input.is_action_just_pressed("pause") and not lost:
 		paused = not paused
-		$UI/Paused.visible = paused
+		$Pause.visible = paused
 		if paused:
 			$FallTimer.stop()
 		else:
 			$FallTimer.start()
+
+	if lost and Input.is_action_just_released("confirm"):
+		var save
+		if ResourceLoader.exists(SAVE_PATH):
+			save = ResourceLoader.load(SAVE_PATH)
+		else:
+			save = Save.new()
+
+		if player_name:
+			save.add_score(player_name, score)
+		else:
+			save.add_score("PLAYER", score)
+		ResourceSaver.save(save, SAVE_PATH)
+
+		var scene = load("res://scenes/leaderboard.tscn").instantiate()
+		get_tree().root.add_child(scene)
+		queue_free()
+
+func _input(event):
+	if lost and event is InputEventKey and event.pressed:
+		var letter = null
+		if event.keycode == KEY_SPACE:
+			letter = " "
+		elif event.keycode >= KEY_0 and event.keycode <= KEY_9 and len(event.as_text()) == 1:
+			letter = event.as_text()
+		elif event.keycode >= KEY_A and event.keycode <= KEY_Z and len(event.as_text()) == 1:
+			letter = event.as_text()
+		elif event.keycode == KEY_BACKSPACE:
+			player_name = player_name.substr(0, len(player_name) - 1)
+			update_name_text()
+
+		if letter and len(player_name) < 10:
+			player_name += letter
+			update_name_text()
 
 func _on_fall_timer_timeout() -> void:
 	fall()
@@ -79,6 +119,10 @@ func _on_rotate_timer_timeout() -> void:
 
 func _on_fast_drop_timer_timeout() -> void:
 	fast_drop()
+
+func _on_cursor_timer_timeout() -> void:
+	show_cursor = not show_cursor
+	update_name_text()
 
 func fall() -> void:
 	var old_cells = erase_block()
@@ -189,7 +233,13 @@ func spawn_block() -> void:
 	var coords1 = $BlockLayer.get_cell_atlas_coords(cells[0])
 	var coords2 = $BlockLayer.get_cell_atlas_coords(cells[1])
 	if coords1 != Vector2i(-1, -1) or coords2 != Vector2i(-1, -1):
-		get_tree().reload_current_scene()
+		player_name = ""
+		paused = true
+		lost = true
+
+		$Lost.visible = true
+		$CursorTimer.start()
+		update_name_text()
 		return
 
 	$BlockLayer.set_cell(cells[0], 0, Vector2i(block[0], 0))
@@ -217,7 +267,7 @@ func clear_blocks():
 		for c in range(10):
 			for r in range(20):
 				var cell = Vector2i(c, r)
-				if block_value(cell) > -1:
+				if block_value(cell) > 0:
 					var row_seq = []
 					var row_sum = 0
 					var row_seq_found = null
@@ -270,12 +320,14 @@ func clear_blocks():
 							counts[block_value(seq_cell)] += 1
 							$BlockLayer.erase_cell(seq_cell)
 
-							for i in range(seq_cell.y):
+							for i in range(1, seq_cell.y):
 								var above = seq_cell - Vector2i(0, i)
 								var coords = $BlockLayer.get_cell_atlas_coords(above)
 								if coords != Vector2i(-1, -1):
 									$BlockLayer.set_cell(above + Vector2i(0, 1), 0, coords)
 									$BlockLayer.erase_cell(above)
+								else:
+									break
 
 						var sevens = row_sum_found / 7
 						if len(row_seq_found) == sevens:
@@ -302,12 +354,14 @@ func clear_blocks():
 							counts[block_value(seq_cell)] += 1
 							$BlockLayer.erase_cell(seq_cell)
 
-						for i in range(cell.y):
+						for i in range(1, cell.y):
 							var above = cell - Vector2i(0, i)
 							var coords = $BlockLayer.get_cell_atlas_coords(above)
 							if coords != Vector2i(-1, -1):
 								$BlockLayer.set_cell(above + Vector2i(0, len(col_seq_found)), 0, coords)
 								$BlockLayer.erase_cell(above)
+							else:
+								break
 
 						var sevens = col_sum_found / 7
 						if len(col_seq_found) == sevens:
@@ -343,3 +397,9 @@ func update_labels() -> void:
 		get_node("UI/Blocks" + str(i)).text = str(counts[i])
 	$UI/NextBlock1.frame = next[0]
 	$UI/NextBlock2.frame = next[1]
+
+func update_name_text() -> void:
+	if show_cursor and len(player_name) < 10:
+		$Lost/Name.text = "INPUT NAME:\n" + player_name + "_"
+	else:
+		$Lost/Name.text = "INPUT NAME:\n" + player_name
