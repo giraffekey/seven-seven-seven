@@ -1,7 +1,6 @@
 extends Node2D
 
-const SAVE_PATH = "res://777-save.tres"
-const Save = preload("res://resources/save.gd")
+const SAVE_PATH = "user://777.save"
 
 var block = [null, null]
 var next = [null, null]
@@ -23,6 +22,7 @@ func _ready() -> void:
 	gen_next()
 	spawn_block()
 	update_labels()
+	$Music.play()
 
 func _process(_delta: float) -> void:
 	if Input.is_action_just_pressed("left") and not $FallTimer.is_stopped():
@@ -68,24 +68,28 @@ func _process(_delta: float) -> void:
 		$Pause.visible = paused
 		if paused:
 			$FallTimer.stop()
+			$Music.stop()
 		else:
 			$FallTimer.start()
+			$Music.play()
 
 	if lost and Input.is_action_just_released("confirm"):
-		var save
-		if ResourceLoader.exists(SAVE_PATH):
-			save = ResourceLoader.load(SAVE_PATH)
+		var save_data
+		if FileAccess.file_exists(SAVE_PATH):
+			var json = JSON.new()
+			json.parse(FileAccess.get_file_as_string(SAVE_PATH))
+			save_data = json.data
 		else:
-			save = Save.new()
+			save_data = {"scores": []}
 
-		if player_name:
-			save.add_score(player_name, score)
-		else:
-			save.add_score("PLAYER", score)
-		ResourceSaver.save(save, SAVE_PATH)
+		save_data.scores.append({"name": player_name, "score": score})
+
+		var save_file = FileAccess.open(SAVE_PATH, FileAccess.WRITE)
+		save_file.store_string(JSON.stringify(save_data))
 
 		var scene = load("res://scenes/leaderboard.tscn").instantiate()
 		get_tree().root.add_child(scene)
+		get_tree().root.remove_child(self)
 		queue_free()
 
 func _input(event):
@@ -240,6 +244,7 @@ func spawn_block() -> void:
 		$Lost.visible = true
 		$CursorTimer.start()
 		update_name_text()
+		$Music.stop()
 		return
 
 	$BlockLayer.set_cell(cells[0], 0, Vector2i(block[0], 0))
