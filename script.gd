@@ -9,6 +9,7 @@ var score = 0
 var next_level = 500
 var level = 1
 var counts = [0, 0, 0, 0, 0, 0, 0, 0]
+var paused = false
 var fast_dropping = false
 
 func _ready() -> void:
@@ -55,6 +56,14 @@ func _process(_delta: float) -> void:
 	if Input.is_action_just_released("fast_drop"):
 		$FastDropTimer.stop()
 		fast_dropping = false
+
+	if Input.is_action_just_pressed("pause"):
+		paused = not paused
+		$UI/Paused.visible = paused
+		if paused:
+			$FallTimer.stop()
+		else:
+			$FallTimer.start()
 
 func _on_fall_timer_timeout() -> void:
 	fall()
@@ -186,7 +195,8 @@ func spawn_block() -> void:
 	$BlockLayer.set_cell(cells[0], 0, Vector2i(block[0], 0))
 	$BlockLayer.set_cell(cells[1], 0, Vector2i(block[1], 0))
 
-	$FallTimer.start()
+	if not paused:
+		$FallTimer.start()
 
 func erase_block() -> Array:
 	var cells = block_cells()
@@ -319,8 +329,9 @@ func clear_blocks():
 
 					update_labels()
 
-	$FallTimer.start()
-	
+	if not paused:
+		$FallTimer.start()
+
 	if fast_dropping:
 		$FastDropTimer.start()
 

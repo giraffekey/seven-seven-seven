@@ -180,6 +180,15 @@ texture = ExtResource("2_0xm2m")
 hframes = 8
 vframes = 2
 
+[node name="Paused" type="Label" parent="UI"]
+visible = false
+offset_left = 284.0
+offset_top = 224.0
+offset_right = 356.0
+offset_bottom = 256.0
+text = "PAUSED"
+label_settings = SubResource("LabelSettings_7mycd")
+
 [connection signal="timeout" from="FallTimer" to="." method="_on_fall_timer_timeout"]
 [connection signal="timeout" from="MoveLeftTimer" to="." method="_on_move_left_timer_timeout"]
 [connection signal="timeout" from="MoveRightTimer" to="." method="_on_move_right_timer_timeout"]
