@@ -416,9 +416,9 @@ func update_labels() -> void:
 
 func update_name_text() -> void:
 	if show_cursor and len(player_name) < 10:
-		$Lost/Name.text = "INPUT NAME:\n" + player_name + "_"
+		$Lost/Name.text = "ENTER NAME:\n" + player_name + "_"
 	else:
-		$Lost/Name.text = "INPUT NAME:\n" + player_name
+		$Lost/Name.text = "ENTER NAME:\n" + player_name
 
 func lose() -> void:
 	player_name = ""
